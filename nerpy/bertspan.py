@@ -14,7 +14,7 @@ from nerpy.ner_utils import InputExample
 
 
 class FeedForwardNetwork(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, dropout_rate=0):
+    def __init__(self, input_size, hidden_size, output_size, dropout_rate=0.2):
         super(FeedForwardNetwork, self).__init__()
         self.dropout_rate = dropout_rate
         self.linear1 = nn.Linear(input_size, hidden_size)

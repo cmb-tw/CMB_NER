@@ -21,7 +21,7 @@ def merge_slots(slot_files):
     merged_slots = set()
     for file_name in slot_files:
         slots = read_slot_file(file_name)
-        slots = set(random.sample(list(slots), 100000))
+        slots = set(random.sample(list(slots), 200000))
         merged_slots.update(slots)
     
     return merged_slots
