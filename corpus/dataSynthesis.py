@@ -20,6 +20,11 @@ def merge_slots(slot_files):
     for file_name in slot_files:
         slots = read_slot_file(file_name)
         merged_slots.update(slots)
+    
+    # 随机抽样10万条数据
+    if len(merged_slots) > 100000:
+        merged_slots = set(random.sample(list(merged_slots), 100000))
+    
     return merged_slots
 
 # 填充模板文本的槽位
@@ -61,7 +66,7 @@ def main():
     templates = read_template_file('template.csv')
     
     # 设置采样大小和分割率
-    sample_size = 100000
+    sample_size = 500000
     split_rate = 0.8
     
     # 转换为序列标注的格式
