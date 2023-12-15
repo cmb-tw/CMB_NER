@@ -19,7 +19,7 @@ from nerpy.dataset import load_data
 def main():
     parser = argparse.ArgumentParser('NER task')
     parser.add_argument('--task_name', default='cner', const='cner', nargs='?',
-                        choices=['cner', 'people'], help='task name of dataset')
+                        choices=['cner', 'people', 'cmb'], help='task name of dataset')
     parser.add_argument('--model_type', default='bertspan', type=str, help='Transformers model type')
     parser.add_argument('--model_name', default='bert-base-chinese', type=str, help='Transformers model or path')
     parser.add_argument('--do_train', action='store_true', help='Whether to run training.')
