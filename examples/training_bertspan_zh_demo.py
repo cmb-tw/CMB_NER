@@ -81,9 +81,11 @@ def main():
 
         # Predictions on text strings
         sentences = [
-            "招行的公司概况",
+            "建行的公司概况",
             "招商银行的公司概况",
-            "老虎研究中心的结算概况"
+            "老虎研究中心的结算概况",
+            "阿里的结算概况",
+            "比亚迪的结算概况"
         ]
         predictions, raw_outputs, entities = model.predict(sentences, split_on_space=False)
         print(predictions, raw_outputs)
