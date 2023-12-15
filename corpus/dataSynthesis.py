@@ -1,6 +1,8 @@
 import csv
 import random
 
+generated_sentences = dict()
+
 # 读取槽位信息文件
 def read_slot_file(file_name):
     with open(file_name, 'r', encoding='utf-8') as file:
@@ -19,7 +21,7 @@ def merge_slots(slot_files):
     merged_slots = set()
     for file_name in slot_files:
         slots = read_slot_file(file_name)
-        slots = set(random.sample(list(slots), 50000))
+        slots = set(random.sample(list(slots), 100000))
         merged_slots.update(slots)
     
     return merged_slots
@@ -69,13 +71,15 @@ def main():
     # 转换为序列标注的格式
     labeled_data = []
     
-    for i in range(sample_size):
+    for _ in range(sample_size):
         template = random.choice(templates)
         if "{{company}}" in template: 
             slot = random.choice(merged_slots)
             sentence = fill_template(template, slot)
-            labeled_text = convert_to_sequence_labeling(sentence, slot)
-            labeled_data.append(labeled_text)
+            if sentence not in generated_sentences:
+                generated_sentences[sentence] = 1
+                labeled_text = convert_to_sequence_labeling(sentence, slot)
+                labeled_data.append(labeled_text)
 
     # 随机打乱数据
     random.shuffle(labeled_data)
