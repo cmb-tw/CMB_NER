@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author:XuMing(xuming624@qq.com)
-@description: pip install fastapi uvicorn
-"""
 import argparse
 import uvicorn
 import sys
@@ -17,7 +13,7 @@ from nerpy import NERModel
 pwd_path = os.path.abspath(os.path.dirname(__file__))
 # Use fine-tuned model
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_name_or_path", type=str, default="shibing624/bert4ner-base-chinese",
+parser.add_argument("--model_name_or_path", type=str, default="/home/hyjiang/glm-app/CMB_NER/examples/outputs/cner_bertspan/best_model",
                     help="Model save dir or model name")
 args = parser.parse_args()
 s_model = NERModel('bert', args.model_name_or_path)
@@ -37,17 +33,21 @@ async def index():
     return {"message": "index, docs url: /docs"}
 
 
-@app.get('/entity')
+@app.get('/predict/')
 async def entity(q: str = Query(..., min_length=1, max_length=128, title='query')):
     try:
         preds, outputs, entities = s_model.predict([q], split_on_space=False)
-        result_dict = {'entity': entities}
+        result_dict = {
+                'entity': entities, 
+                'preds': preds, 
+                'outputs': outputs
+            }
         logger.debug(f"Successfully get sentence entity, q:{q}")
         return result_dict
     except Exception as e:
         logger.error(e)
-        return {'status': False, 'msg': e}, 400
+        return {'status': False, 'msg': e}, 500
 
 
 if __name__ == '__main__':
-    uvicorn.run(app=app, host='0.0.0.0', port=8001)
+    uvicorn.run(app=app, host='0.0.0.0', port=8002)
