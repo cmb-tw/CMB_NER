@@ -39,8 +39,8 @@ async def entity(q: str = Query(..., min_length=1, max_length=128, title='query'
         preds, outputs, entities = s_model.predict([q], split_on_space=False)
         result_dict = {
                 'entity': entities, 
-                'preds': preds, 
-                'outputs': outputs
+                #'preds': preds, 
+                #'outputs': outputs
             }
         logger.debug(f"Successfully get sentence entity, q:{q}")
         return result_dict
