@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model_name_or_path", type=str, default="./outputs/cner_bertspan/best_model",
                     help="Model save dir or model name")
 args = parser.parse_args()
-s_model = NERModel('bert', args.model_name_or_path)
+s_model = NERModel('bertspan', args.model_name_or_path)
 
 # define the app
 app = FastAPI()
