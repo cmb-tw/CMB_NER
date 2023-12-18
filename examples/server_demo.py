@@ -37,6 +37,8 @@ async def index():
 async def entity(q: str = Query(..., min_length=1, max_length=128, title='query')):
     try:
         preds, outputs, entities = s_model.predict([q], split_on_space=False)
+        print(preds)
+        print(outputs)
         result_dict = {
                 'entity': entities, 
                 #'preds': preds, 
