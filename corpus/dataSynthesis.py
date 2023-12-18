@@ -65,7 +65,7 @@ def main():
     templates = read_template_file('template.csv')
     
     # 设置采样大小和分割率
-    sample_size = 500000
+    sample_size = 100000
     split_rate = 0.8
     
     # 转换为序列标注的格式
