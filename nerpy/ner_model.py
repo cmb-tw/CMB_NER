@@ -1388,93 +1388,7 @@ class NERModel:
                 )
                 for i, sentence in enumerate(to_predict)
             ]
-        if self.args.onnx:
-            # Encode
-            model_inputs = self.tokenizer.batch_encode_plus(
-                to_predict,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-                is_split_into_words=(not split_on_space),
-            )
-
-            # Change shape for batching
-            encoded_model_inputs = []
-            if self.args.model_type in ["bert", "bertspan", "xlnet", "albert"]:
-                for input_ids, attention_mask, token_type_ids in tqdm(
-                    zip(
-                        model_inputs["input_ids"],
-                        model_inputs["attention_mask"],
-                        model_inputs["token_type_ids"],
-                    )
-                ):
-                    encoded_model_inputs.append(
-                        (input_ids, attention_mask, token_type_ids)
-                    )
-            else:
-                for input_ids, attention_mask in tqdm(
-                    zip(model_inputs["input_ids"], model_inputs["attention_mask"])
-                ):
-                    encoded_model_inputs.append((input_ids, attention_mask))
-
-            # Setup batches
-            eval_sampler = SequentialSampler(encoded_model_inputs)
-            eval_dataloader = DataLoader(
-                encoded_model_inputs,
-                sampler=eval_sampler,
-                batch_size=args.eval_batch_size,
-            )
-            for batch in tqdm(
-                eval_dataloader, disable=args.silent, desc="Running Prediction"
-            ):
-                if self.args.model_type in ["bert", "bertspan", "xlnet", "albert"]:
-                    inputs_onnx = {
-                        "input_ids": batch[0].detach().cpu().numpy(),
-                        "attention_mask": batch[1].detach().cpu().numpy(),
-                        "token_type_ids": batch[2].detach().cpu().numpy(),
-                    }
-                else:
-                    inputs_onnx = {
-                        "input_ids": batch[0].detach().cpu().numpy(),
-                        "attention_mask": batch[1].detach().cpu().numpy(),
-                    }
-
-                # Run the model (None = get all the outputs)
-                output = self.model.run(None, inputs_onnx)
-
-                if preds is None:
-                    preds = output[0]
-                    out_input_ids = inputs_onnx["input_ids"]
-                    out_attention_mask = inputs_onnx["attention_mask"]
-                else:
-                    preds = np.append(preds, output[0], axis=0)
-                    out_input_ids = np.append(
-                        out_input_ids, inputs_onnx["input_ids"], axis=0
-                    )
-                    out_attention_mask = np.append(
-                        out_attention_mask, inputs_onnx["attention_mask"], axis=0
-                    )
-
-            pad_token_label_id = -100
-            out_label_ids = [[] for _ in range(len(to_predict))]
-            max_len = len(out_input_ids[0])
-
-            for index, sentence in enumerate(to_predict):
-                for word in sentence.split():
-                    word_tokens = self.tokenizer.tokenize(word)
-                    out_label_ids[index].extend(
-                        [0] + [pad_token_label_id] * (len(word_tokens) - 1)
-                    )
-                out_label_ids[index].insert(0, pad_token_label_id)
-                out_label_ids[index].append(pad_token_label_id)
-
-                if len(out_label_ids[index]) < max_len:
-                    out_label_ids[index].extend(
-                        [-100] * (max_len - len(out_label_ids[index]))
-                    )
-
-            out_label_ids = np.array(out_label_ids).reshape(len(out_label_ids), max_len)
-        else:
+        if not self.args.onnx:
             eval_dataset = self.load_and_cache_examples(
                 None, to_predict=predict_examples
             )
@@ -1524,6 +1438,11 @@ class NERModel:
                 if args.model_type in ["bertspan"]:
                     start_pred = torch.argmax(logits[0], -1).cpu().numpy()
                     end_pred = torch.argmax(logits[1], -1).cpu().numpy()
+                    
+                    # 计算 softmax
+                    start_softmax = torch.nn.functional.softmax(logits[0], dim=-1)
+                    end_softmax = torch.nn.functional.softmax(logits[1], dim=-1)
+                            
                     input_lens = batch[5].cpu().numpy()
                     outputs = get_span_subject(start_pred, end_pred, input_lens)
                     word_tokens = (
@@ -1531,11 +1450,14 @@ class NERModel:
                         if split_on_space
                         else [[word for word in sentence] for sentence in to_predict]
                     )
-                    for model_output, sentence in zip(outputs, word_tokens):
+                    
+                    for start_confidence, end_confidence, model_output, sentence in zip(start_softmax, end_softmax, outputs, word_tokens):
+                        #print(entity_confidence)
+                        #print(model_output)
                         p = []
                         for x in model_output:
                             if x[2] < len(sentence):
-                                p.append((id2label[x[0]], x[1], x[2]))
+                                p.append((id2label[x[0]], x[1], x[2], start_confidence[x[1]][0] * end_confidence[x[2]][0]))
                         if split_on_space:
                             line_entities = [
                                 (

@@ -19,7 +19,7 @@ from nerpy.dataset import load_data
 def main():
     parser = argparse.ArgumentParser('NER task')
     parser.add_argument('--task_name', default='cner', const='cner', nargs='?',
-                        choices=['cner', 'people'], help='task name of dataset')
+                        choices=['cner', 'people', 'cmb'], help='task name of dataset')
     parser.add_argument('--model_type', default='bert', type=str, help='Transformers model type')
     parser.add_argument('--model_name', default='bert-base-chinese', type=str, help='Transformers model or path')
     parser.add_argument('--do_train', action='store_true', help='Whether to run training.')
@@ -28,7 +28,7 @@ def main():
     parser.add_argument('--best_model_dir', default='./outputs/cner_bertsoftmax/best_model/', type=str,
                         help='Model output directory')
     parser.add_argument('--max_seq_length', default=128, type=int, help='Max sequence length')
-    parser.add_argument('--num_epochs', default=10, type=int, help='Number of training epochs')
+    parser.add_argument('--num_epochs', default=4, type=int, help='Number of training epochs')
     parser.add_argument('--batch_size', default=32, type=int, help='Batch size')
     args = parser.parse_args()
     logger.info(args)
@@ -81,8 +81,11 @@ def main():
 
         # Predictions on text strings
         sentences = [
-            "常建良，男，1963年出生，工科学士，高级工程师，北京物资学院客座副教授",
-            "1985年8月-1993年在国家物资局、物资部、国内贸易部金属材料流通司从事国家统配钢材中特种钢材品种的调拨分配工作，先后任科员、主任科员。"
+            "建行的公司概况",
+            "招商银行的公司概况",
+            "老虎研究中心的结算概况",
+            "阿里的结算概况",
+            "比亚迪的结算概况"
         ]
         predictions, raw_outputs, entities = model.predict(sentences, split_on_space=False)
         print(predictions, entities)
