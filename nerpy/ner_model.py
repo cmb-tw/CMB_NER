@@ -1586,6 +1586,7 @@ class NERModel:
             preds = span_preds
         else:
             token_logits = preds
+            print(token_logits)
             preds = np.argmax(preds, axis=2)
             out_label_list = [[] for _ in range(out_label_ids.shape[0])]
             preds_list = [[] for _ in range(out_label_ids.shape[0])]
