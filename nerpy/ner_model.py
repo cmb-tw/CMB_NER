@@ -1452,8 +1452,6 @@ class NERModel:
                     )
                     
                     for start_confidence, end_confidence, model_output, sentence in zip(start_softmax, end_softmax, outputs, word_tokens):
-                        #print(entity_confidence)
-                        #print(model_output)
                         p = []
                         for x in model_output:
                             if x[2] < len(sentence):
@@ -1508,7 +1506,6 @@ class NERModel:
             preds = span_preds
         else:
             token_logits = preds
-            print(token_logits)
             preds = np.argmax(preds, axis=2)
             out_label_list = [[] for _ in range(out_label_ids.shape[0])]
             preds_list = [[] for _ in range(out_label_ids.shape[0])]
