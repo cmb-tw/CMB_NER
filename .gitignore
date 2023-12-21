@@ -109,3 +109,5 @@ runs/
 outputs/
 
 company_name.txt
+
+pytorch_model.bin
